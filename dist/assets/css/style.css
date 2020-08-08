@@ -482,7 +482,8 @@ textarea:focus {
 .glazing .aluminum,
 .glazing .plastic,
 .glazing .french,
-.glazing .rise {
+.glazing .rise,
+.glazing .tree {
   display: none;
 }
 
