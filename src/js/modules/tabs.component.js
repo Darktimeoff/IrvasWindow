@@ -23,11 +23,11 @@ function _tabClickHandler(e) {
         const postion = link.className.match(/_/).index;
         const tabContentName = link.className.slice(0, postion);
 
-        _hideClassActiveFromTab.call(this, this.parentTab);
+        _hideClassActiveFromTab.call(this, this.parentTab, '.' + this.activeClass);
 
         _addClassActiveToTab.call(this, link);
 
-        _hideAllTabContent.call(this, this.parentTabContent);
+        _hideClassActiveFromTab.call(this, this.parentTabContent, '.show');
 
         _showTabContent.call(this, _searchTabContent.call(this, tabContentName));
     }
@@ -37,12 +37,12 @@ function _addClassActiveToTab(tab) {
     tab.classList.add(this.activeClass);
 }
 
-function _hideClassActiveFromTab(parentTab) {
-   _deleteClassActiveFromTab.call(this,  parentTab.querySelector('.' + this.activeClass))
+function _hideClassActiveFromTab(parentTab, activeClass) {
+   _deleteClassActiveFromTab.call(this, parentTab.querySelector(activeClass), activeClass.slice(1))
 }
 
-function _deleteClassActiveFromTab(tab) {
-    tab.classList.remove(this.activeClass);
+function _deleteClassActiveFromTab(tab, activeClass) {
+    tab.classList.remove(activeClass);
 }
 
 
@@ -54,11 +54,3 @@ function _searchTabContent(tabName) {
     return this.parentTabContent.querySelector('.' + tabName);
 }
 
-function _hideTabContent(tab) {
-    console.log(tab);
-    tab.classList.remove('show');
-}
-
-function _hideAllTabContent(parentTab) {
-    _hideTabContent(parentTab.querySelector('.show'));       
-}
