@@ -15944,6 +15944,7 @@ document.addEventListener('DOMContentLoaded', function () {
     useWrapperDelegationSel: '.glazing'
   });
   var glazingTabs = new _modules_tabs_component__WEBPACK_IMPORTED_MODULE_2__["default"]('.glazing', '.glazing_slider', '.glazing_block', '.glazing', '.glazing_content', 'active', 'a').init();
+  var decorationTabs = new _modules_tabs_component__WEBPACK_IMPORTED_MODULE_2__["default"]('.decoration', '.decoration_slider', '.decoration_item', '.decoration_content .row', 'div', 'after_click', 'div').init();
 });
 
 /***/ }),

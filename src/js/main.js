@@ -13,4 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
     popupCalc.modalDelegation({useWrapperDelegationSel: '.glazing'});
 
     const glazingTabs = new Tabs('.glazing', '.glazing_slider', '.glazing_block', '.glazing', '.glazing_content' , 'active', 'a').init();
+
+    const decorationTabs = new Tabs('.decoration', '.decoration_slider', '.decoration_item', '.decoration_content .row', 'div', 'after_click', 'div').init();
 });
