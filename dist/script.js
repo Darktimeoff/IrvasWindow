@@ -17113,7 +17113,7 @@ document.addEventListener('DOMContentLoaded', function () {
   popup.modalDelegation({
     useButtonsClass: true
   });
-  popup.showWithDelay(60000);
+  popup.showWithDelay(1000);
   var popupCalc = new _modules_modal_component__WEBPACK_IMPORTED_MODULE_1__["default"]('.popup_calc', '.popup_calc_btn');
   popupCalc.modalDelegation({
     useWrapperDelegationSel: '.glazing'
@@ -17237,12 +17237,9 @@ function () {
     value: function showWithDelay(delay) {
       var _this2 = this;
 
-      if (JSON.parse(localStorage.getItem('showModal'))) return;else {
-        setTimeout(function () {
-          _this2.emulatedClick();
-        }, delay);
-        localStorage.setItem('showModal', true);
-      }
+      setTimeout(function () {
+        _this2.emulatedClick();
+      }, delay);
     }
   }, {
     key: "emulatedClick",

@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const popup = new Modal('.popup', '.phone_link');
     popup.modalDelegation({useButtonsClass: true});
-    popup.showWithDelay(60000);
+    popup.showWithDelay(1000);
 
     const popupCalc = new Modal('.popup_calc', '.popup_calc_btn');
     popupCalc.modalDelegation({useWrapperDelegationSel: '.glazing'});

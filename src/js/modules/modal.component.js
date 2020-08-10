@@ -50,11 +50,7 @@ export default class Modal {
 
 
 	showWithDelay(delay) {
-		if(JSON.parse(localStorage.getItem('showModal'))) return;
-		else {
-			setTimeout(() => {this.emulatedClick()}, delay);
-			localStorage.setItem('showModal', true);
-		}
+		setTimeout(() => {this.emulatedClick()}, delay);
 	}
 
 	emulatedClick() {
