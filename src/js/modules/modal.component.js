@@ -22,7 +22,6 @@ export default class Modal {
 		}
 	}
 
-
     init() {
 		if(this.buttonOpen instanceof NodeList) {
 			this.buttonOpen.forEach(button => {
@@ -47,6 +46,19 @@ export default class Modal {
 	
 	destroy() {
 		this.onDestroy();
+	}
+
+
+	showWithDelay(delay) {
+		if(JSON.parse(localStorage.getItem('showModal'))) return;
+		else {
+			setTimeout(() => {this.emulatedClick()}, delay);
+			localStorage.setItem('showModal', true);
+		}
+	}
+
+	emulatedClick() {
+		typeof this.buttonOpen === 'object' ? this.buttonOpen[0].click() : this.buttonOpen.click();
 	}
 
 	onShow() {}
