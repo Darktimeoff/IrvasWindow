@@ -2446,6 +2446,78 @@ exports.f = __webpack_require__(/*! ../internals/well-known-symbol */ "./node_mo
 
 /***/ }),
 
+/***/ "./node_modules/core-js/modules/es.array.concat.js":
+/*!*********************************************************!*\
+  !*** ./node_modules/core-js/modules/es.array.concat.js ***!
+  \*********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
+var fails = __webpack_require__(/*! ../internals/fails */ "./node_modules/core-js/internals/fails.js");
+var isArray = __webpack_require__(/*! ../internals/is-array */ "./node_modules/core-js/internals/is-array.js");
+var isObject = __webpack_require__(/*! ../internals/is-object */ "./node_modules/core-js/internals/is-object.js");
+var toObject = __webpack_require__(/*! ../internals/to-object */ "./node_modules/core-js/internals/to-object.js");
+var toLength = __webpack_require__(/*! ../internals/to-length */ "./node_modules/core-js/internals/to-length.js");
+var createProperty = __webpack_require__(/*! ../internals/create-property */ "./node_modules/core-js/internals/create-property.js");
+var arraySpeciesCreate = __webpack_require__(/*! ../internals/array-species-create */ "./node_modules/core-js/internals/array-species-create.js");
+var arrayMethodHasSpeciesSupport = __webpack_require__(/*! ../internals/array-method-has-species-support */ "./node_modules/core-js/internals/array-method-has-species-support.js");
+var wellKnownSymbol = __webpack_require__(/*! ../internals/well-known-symbol */ "./node_modules/core-js/internals/well-known-symbol.js");
+var V8_VERSION = __webpack_require__(/*! ../internals/v8-version */ "./node_modules/core-js/internals/v8-version.js");
+
+var IS_CONCAT_SPREADABLE = wellKnownSymbol('isConcatSpreadable');
+var MAX_SAFE_INTEGER = 0x1FFFFFFFFFFFFF;
+var MAXIMUM_ALLOWED_INDEX_EXCEEDED = 'Maximum allowed index exceeded';
+
+// We can't use this feature detection in V8 since it causes
+// deoptimization and serious performance degradation
+// https://github.com/zloirock/core-js/issues/679
+var IS_CONCAT_SPREADABLE_SUPPORT = V8_VERSION >= 51 || !fails(function () {
+  var array = [];
+  array[IS_CONCAT_SPREADABLE] = false;
+  return array.concat()[0] !== array;
+});
+
+var SPECIES_SUPPORT = arrayMethodHasSpeciesSupport('concat');
+
+var isConcatSpreadable = function (O) {
+  if (!isObject(O)) return false;
+  var spreadable = O[IS_CONCAT_SPREADABLE];
+  return spreadable !== undefined ? !!spreadable : isArray(O);
+};
+
+var FORCED = !IS_CONCAT_SPREADABLE_SUPPORT || !SPECIES_SUPPORT;
+
+// `Array.prototype.concat` method
+// https://tc39.github.io/ecma262/#sec-array.prototype.concat
+// with adding support of @@isConcatSpreadable and @@species
+$({ target: 'Array', proto: true, forced: FORCED }, {
+  concat: function concat(arg) { // eslint-disable-line no-unused-vars
+    var O = toObject(this);
+    var A = arraySpeciesCreate(O, 0);
+    var n = 0;
+    var i, k, length, len, E;
+    for (i = -1, length = arguments.length; i < length; i++) {
+      E = i === -1 ? O : arguments[i];
+      if (isConcatSpreadable(E)) {
+        len = toLength(E.length);
+        if (n + len > MAX_SAFE_INTEGER) throw TypeError(MAXIMUM_ALLOWED_INDEX_EXCEEDED);
+        for (k = 0; k < len; k++, n++) if (k in E) createProperty(A, n, E[k]);
+      } else {
+        if (n >= MAX_SAFE_INTEGER) throw TypeError(MAXIMUM_ALLOWED_INDEX_EXCEEDED);
+        createProperty(A, n++, E);
+      }
+    }
+    A.length = n;
+    return A;
+  }
+});
+
+
+/***/ }),
+
 /***/ "./node_modules/core-js/modules/es.array.iterator.js":
 /*!***********************************************************!*\
   !*** ./node_modules/core-js/modules/es.array.iterator.js ***!
@@ -2507,6 +2579,36 @@ Iterators.Arguments = Iterators.Array;
 addToUnscopables('keys');
 addToUnscopables('values');
 addToUnscopables('entries');
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/modules/es.array.join.js":
+/*!*******************************************************!*\
+  !*** ./node_modules/core-js/modules/es.array.join.js ***!
+  \*******************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
+var IndexedObject = __webpack_require__(/*! ../internals/indexed-object */ "./node_modules/core-js/internals/indexed-object.js");
+var toIndexedObject = __webpack_require__(/*! ../internals/to-indexed-object */ "./node_modules/core-js/internals/to-indexed-object.js");
+var sloppyArrayMethod = __webpack_require__(/*! ../internals/sloppy-array-method */ "./node_modules/core-js/internals/sloppy-array-method.js");
+
+var nativeJoin = [].join;
+
+var ES3_STRINGS = IndexedObject != Object;
+var SLOPPY_METHOD = sloppyArrayMethod('join', ',');
+
+// `Array.prototype.join` method
+// https://tc39.github.io/ecma262/#sec-array.prototype.join
+$({ target: 'Array', proto: true, forced: ES3_STRINGS || SLOPPY_METHOD }, {
+  join: function join(separator) {
+    return nativeJoin.call(toIndexedObject(this), separator === undefined ? ',' : separator);
+  }
+});
 
 
 /***/ }),
@@ -17103,6 +17205,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _modules_modal_component__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./modules/modal.component */ "./src/js/modules/modal.component.js");
 /* harmony import */ var _modules_tabs_component__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./modules/tabs.component */ "./src/js/modules/tabs.component.js");
 /* harmony import */ var _modules_timer_component__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./modules/timer.component */ "./src/js/modules/timer.component.js");
+/* harmony import */ var _modules_gallery_component__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./modules/gallery.component */ "./src/js/modules/gallery.component.js");
+
 
 
 
@@ -17112,16 +17216,106 @@ document.addEventListener('DOMContentLoaded', function () {
   var popup = new _modules_modal_component__WEBPACK_IMPORTED_MODULE_1__["default"]('.popup', '.phone_link');
   popup.modalDelegation({
     useButtonsClass: true
-  });
-  popup.showWithDelay(1000);
+  }); //popup.showWithDelay(1000);
+
   var popupCalc = new _modules_modal_component__WEBPACK_IMPORTED_MODULE_1__["default"]('.popup_calc', '.popup_calc_btn');
   popupCalc.modalDelegation({
     useWrapperDelegationSel: '.glazing'
   });
+
+  popupCalc.onShow = function () {};
+
   var glazingTabs = new _modules_tabs_component__WEBPACK_IMPORTED_MODULE_2__["default"]('.glazing', '.glazing_slider', '.glazing_block', '.glazing', '.glazing_content', 'active', 'a').init();
   var decorationTabs = new _modules_tabs_component__WEBPACK_IMPORTED_MODULE_2__["default"]('.decoration', '.decoration_slider', '.decoration_item', '.decoration_content .row', 'div', 'after_click', 'div').init();
   var timer = new _modules_timer_component__WEBPACK_IMPORTED_MODULE_3__["default"]('2020-08-15', '#timer', '#days', '#hours', '#minutes', '#seconds').init();
+  var gallery = new _modules_gallery_component__WEBPACK_IMPORTED_MODULE_4__["default"]('.works').init({
+    classModal: ['popup', 'modal-gallery'],
+    classImgInModal: 'modal-prev-img',
+    modalShowClass: 'show-flex',
+    classTargetImg: 'preview',
+    uniqueClassIndInArray: 1
+  });
 });
+
+/***/ }),
+
+/***/ "./src/js/modules/gallery.component.js":
+/*!*********************************************!*\
+  !*** ./src/js/modules/gallery.component.js ***!
+  \*********************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Gallery; });
+/* harmony import */ var core_js_modules_es_array_concat__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core-js/modules/es.array.concat */ "./node_modules/core-js/modules/es.array.concat.js");
+/* harmony import */ var core_js_modules_es_array_concat__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_concat__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var core_js_modules_es_array_join__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core-js/modules/es.array.join */ "./node_modules/core-js/modules/es.array.join.js");
+/* harmony import */ var core_js_modules_es_array_join__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_join__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _modal_component__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./modal.component */ "./src/js/modules/modal.component.js");
+
+
+
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+
+
+var Gallery =
+/*#__PURE__*/
+function () {
+  function Gallery(section) {
+    _classCallCheck(this, Gallery);
+
+    this.section = document.querySelector(section);
+  }
+
+  _createClass(Gallery, [{
+    key: "init",
+    value: function init(options) {
+      this.section.insertAdjacentHTML('beforeend', _createModalImg(_checkArray(options.classModal) ? options.classModal.join(' ') : options.classModal, options.classImgInModal));
+      this.modalImg = this.section.querySelector(_addPoint(options.classImgInModal));
+      var galleryModal = new _modal_component__WEBPACK_IMPORTED_MODULE_2__["default"](_checkArray(options.classModal) ? _addPoint(options.classModal[options.uniqueClassIndInArray]) : _addPoint(options.classModal), _addPoint(options.classTargetImg), options.modalShowClass);
+      galleryModal.modalDelegation({
+        useWrapperDelegationSel: _addPoint.call(this, this.section.className)
+      });
+      this.section.addEventListener('click', _galleryClickHandler.bind(this, options));
+    }
+  }]);
+
+  return Gallery;
+}();
+
+
+
+function _createModalImg(classModal, classImg) {
+  return "\n        <div class=\"".concat(classModal, "\">\n            <img src=\"assets/img/our_works/1.png\" class=\"").concat(classImg, "\" style=\"margin-bottom:0 !important\"alt=\"img\">\n        </div>\n    ");
+}
+
+;
+
+function _addPoint(arg) {
+  return '.' + arg;
+}
+
+function _checkArray(array) {
+  return array.length > 1 && _typeof(array) === 'object' ? true : false;
+}
+
+function _galleryClickHandler(options, e) {
+  var target = e.target;
+
+  if (target && target.classList.contains(options.classTargetImg)) {
+    var href = target.parentElement.getAttribute('href');
+    this.modalImg.setAttribute('src', href);
+  }
+}
 
 /***/ }),
 
@@ -17175,6 +17369,8 @@ var Modal =
 /*#__PURE__*/
 function () {
   function Modal(modalSel, buttonOpenSel) {
+    var classShow = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'show';
+
     _classCallCheck(this, Modal);
 
     try {
@@ -17183,6 +17379,7 @@ function () {
       this.modalSel = modalSel;
       this.buttonOpen = document.querySelector(buttonOpenSel);
       this.modalClose = this.modal.querySelector('[data-close]');
+      this.classShow = classShow;
     } catch (e) {
       throw new Error("variables doesn't found");
     }
@@ -17216,14 +17413,14 @@ function () {
   }, {
     key: "show",
     value: function show() {
-      this.modal.classList.add('show');
+      this.modal.classList.add(this.classShow);
       document.body.style.overflow = 'hidden';
       this.onShow();
     }
   }, {
     key: "hide",
     value: function hide() {
-      this.modal.classList.remove('show');
+      this.modal.classList.remove(this.classShow);
       document.body.style.overflow = '';
       this.onHide();
     }
@@ -17279,12 +17476,10 @@ function _modalClose(event) {
 
   if (target && target.closest('[data-close]') === this.modalClose) {
     this.hide();
-    console.log('button close');
   }
 
   if (target && target === this.modal) {
     this.hide();
-    console.log('button');
   }
 }
 
@@ -17331,7 +17526,7 @@ function () {
     this.parentTabContent = section !== parentTabContent ? this.section.querySelector(parentTabContent) : this.section;
     this.tabContent = tabContent;
     this.activeClass = activeClass;
-    this.activeElement = activeElement;
+    this.activeElement = activeElement !== tab ? activeElement : parentTab;
   }
 
   _createClass(Tabs, [{

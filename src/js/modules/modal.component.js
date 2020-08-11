@@ -1,11 +1,12 @@
 export default class Modal {
-    constructor(modalSel, buttonOpenSel) {
+    constructor(modalSel, buttonOpenSel, classShow='show') {
        try{
 			this.modal = document.querySelector(modalSel);
 			this.buttonOpenSel = buttonOpenSel;
 			this.modalSel = modalSel;
 			this.buttonOpen = document.querySelector(buttonOpenSel)
 			this.modalClose = this.modal.querySelector('[data-close]');
+			this.classShow = classShow;
  	   } catch(e) {
 			throw new Error("variables doesn't found");
 	   }
@@ -33,13 +34,13 @@ export default class Modal {
     }
 
     show() {
-		this.modal.classList.add('show');
+		this.modal.classList.add(this.classShow);
 		document.body.style.overflow = 'hidden';
 		this.onShow();
     }
 
     hide() {
-		this.modal.classList.remove('show');
+		this.modal.classList.remove(this.classShow);
 		document.body.style.overflow = '';
 		this.onHide();
 	}
@@ -79,12 +80,10 @@ function _modalClose(event) {
 	const target = event.target;
 	if(target && (target.closest('[data-close]') === this.modalClose)) {
 		this.hide();
-		console.log('button close');
 	}
 
 	if(target && (target === this.modal)) {
 		this.hide();
-		console.log('button');
 	}
 }
 

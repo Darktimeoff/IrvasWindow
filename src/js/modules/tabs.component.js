@@ -6,7 +6,7 @@ export default class Tabs {
         this.parentTabContent = section !== parentTabContent ? this.section.querySelector(parentTabContent) : this.section;
         this.tabContent = tabContent;
         this.activeClass = activeClass;
-        this.activeElement = activeElement;
+        this.activeElement = activeElement !== tab ? activeElement : parentTab;
     }
 
     init() {
