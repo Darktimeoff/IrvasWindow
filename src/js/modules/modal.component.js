@@ -1,5 +1,9 @@
+import Form from './form.component';
+import Validators from './validators.component';
+
+
 export default class Modal {
-    constructor(modalSel, buttonOpenSel, classShow='show') {
+    constructor(modalSel, buttonOpenSel, classShow='show', formClass='form') {
        try{
 			this.modal = document.querySelector(modalSel);
 			this.buttonOpenSel = buttonOpenSel;
@@ -7,6 +11,7 @@ export default class Modal {
 			this.buttonOpen = document.querySelector(buttonOpenSel)
 			this.modalClose = this.modal.querySelector('[data-close]');
 			this.classShow = classShow;
+			this.formElm = this.modal.querySelector('.' + formClass);
  	   } catch(e) {
 			throw new Error("variables doesn't found");
 	   }

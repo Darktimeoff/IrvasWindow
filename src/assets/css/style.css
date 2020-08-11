@@ -605,7 +605,9 @@ textarea:focus {
   width: 70%;
   object-fit: contain;
 }
-
+.invalid{
+  border: 1px solid red;
+}
 .works a[data-fancybox="gallery"] .lupa {
   /* position: ; */
   top: 0;

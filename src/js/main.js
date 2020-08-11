@@ -3,6 +3,9 @@ import Modal from "./modules/modal.component";
 import Tabs from "./modules/tabs.component";
 import Timer from "./modules/timer.component";
 import Gallery from "./modules/gallery.component";
+import Form from './modules/form.component';
+import Validators from "./modules/validators.component";
+import RequestService from "./services/request.services";
 
 
 
@@ -32,4 +35,29 @@ document.addEventListener('DOMContentLoaded', () => {
         classTargetImg: 'preview',
         uniqueClassIndInArray: 1
     });
+
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+        form.addEventListener('submit', _formSubmitHandler);
+    })
+
+    async function _formSubmitHandler(e) {
+        e.preventDefault();
+        const form = new Form(e.target, {
+            user_name:[Validators.required],
+            user_phone:[Validators.required, Validators.minLength(8)]
+        });
+        if(form.isValid()) {
+            const data =  {...form.value()};
+            RequestService.postRequest(data, 'assets/server.php')
+            .then(response => {
+                console.log(response);
+            })
+            .catch(e => {
+                    console.log(e);
+            })
+            
+            form.clear();
+        }
+    }
 });
