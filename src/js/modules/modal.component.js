@@ -29,12 +29,12 @@ export default class Modal {
 	}
 
     init() {
-		if(this.buttonOpen instanceof NodeList) {
+		if(_checkNodeList.call(this, this.buttonOpen)) {
 			this.buttonOpen.forEach(button => {
-				button.addEventListener('click', _buttonHandler.bind(this));
+				button.onclick =  _buttonHandler.bind(this);
 			});
 		} else {
-			this.buttonOpen.addEventListener('click', _buttonHandler.bind(this));
+			this.buttonOpen.onclick =  _buttonHandler.bind(this);
 		}
     }
 
@@ -74,10 +74,13 @@ export default class Modal {
 function _buttonHandler(event) {
 	event.preventDefault();
 	this.show();
-	this.modal.addEventListener('click', _modalHandler.bind(this), {once: true});
+	this.modal.onclick = _modalHandler.bind(this);
 }
-
+function _checkNodeList(array) {
+	return Boolean(array instanceof NodeList);
+}
 function _modalHandler(event) {
+	console.log(1)
 	_modalClose.call(this, event);
 }
 

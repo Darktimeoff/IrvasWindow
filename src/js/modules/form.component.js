@@ -66,7 +66,7 @@ export function forms(selectorForms, urlSend) {
         messageElm.textContent = message.wait;
         e.target.appendChild(messageElm);
 
-        const form = new Form(e.target, {
+        let form = new Form(e.target, {
             user_name:[Validators.required],
             user_phone:[Validators.required, Validators.minLength(8)]
         });

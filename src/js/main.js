@@ -4,8 +4,7 @@ import Tabs from "./modules/tabs.component";
 import Timer from "./modules/timer.component";
 import Gallery from "./modules/gallery.component";
 import { forms } from './modules/form.component';
-import Validators from "./modules/validators.component";
-import RequestService from "./services/request.services";
+
 
 
 

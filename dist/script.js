@@ -19126,10 +19126,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _modules_timer_component__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./modules/timer.component */ "./src/js/modules/timer.component.js");
 /* harmony import */ var _modules_gallery_component__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./modules/gallery.component */ "./src/js/modules/gallery.component.js");
 /* harmony import */ var _modules_form_component__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./modules/form.component */ "./src/js/modules/form.component.js");
-/* harmony import */ var _modules_validators_component__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./modules/validators.component */ "./src/js/modules/validators.component.js");
-/* harmony import */ var _services_request_services__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./services/request.services */ "./src/js/services/request.services.js");
-
-
 
 
 
@@ -19160,7 +19156,7 @@ document.addEventListener('DOMContentLoaded', function () {
     classTargetImg: 'preview',
     uniqueClassIndInArray: 1
   });
-  Object(_modules_form_component__WEBPACK_IMPORTED_MODULE_5__["forms"])('.main-form', 'https://jsonplaceholder.typicode.com/posts');
+  Object(_modules_form_component__WEBPACK_IMPORTED_MODULE_5__["forms"])('form', 'https://jsonplaceholder.typicode.com/posts');
 });
 
 /***/ }),
@@ -19514,12 +19510,12 @@ function () {
     value: function init() {
       var _this = this;
 
-      if (this.buttonOpen instanceof NodeList) {
+      if (_checkNodeList.call(this, this.buttonOpen)) {
         this.buttonOpen.forEach(function (button) {
-          button.addEventListener('click', _buttonHandler.bind(_this));
+          button.onclick = _buttonHandler.bind(_this);
         });
       } else {
-        this.buttonOpen.addEventListener('click', _buttonHandler.bind(this));
+        this.buttonOpen.onclick = _buttonHandler.bind(this);
       }
     }
   }, {
@@ -19574,12 +19570,16 @@ function () {
 function _buttonHandler(event) {
   event.preventDefault();
   this.show();
-  this.modal.addEventListener('click', _modalHandler.bind(this), {
-    once: true
-  });
+  this.modal.onclick = _modalHandler.bind(this);
+}
+
+function _checkNodeList(array) {
+  return Boolean(array instanceof NodeList);
 }
 
 function _modalHandler(event) {
+  console.log(1);
+
   _modalClose.call(this, event);
 }
 
