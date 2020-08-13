@@ -32,9 +32,7 @@ textarea:focus {
 .no-padding {
   padding: 0 !important;
 }
-.show-inline {
-  display: inline !important;
-}
+
 .form {
   /*margin-top: 2rem;*/
   padding: 2rem 5rem;
@@ -51,6 +49,10 @@ textarea:focus {
   font-style: normal;
   color: #333333;
   line-height: 1.5;
+}
+
+.show-inline{
+  display: inline !important;
 }
 
 .form h2 span {
