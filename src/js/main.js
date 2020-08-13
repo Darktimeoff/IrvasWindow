@@ -17,9 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const popupCalc = new Modal('.popup_calc', '.popup_calc_btn');
     popupCalc.modalDelegation({useWrapperDelegationSel: '.glazing'});
-    popupCalc.onShow = function () {
-       
-    }
+   
 
     const glazingTabs = new Tabs('.glazing', '.glazing_slider', '.glazing_block', '.glazing', '.glazing_content' , 'active', 'a').init();
 
@@ -34,6 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
         classTargetImg: 'preview',
         uniqueClassIndInArray: 1
     });
+
+    const popCalcTabs = new Tabs('.popup_calc', '.balcon_icons', 'img', '.big_img', 'img', 'do_image_more', '.balcon_icons_img', false, 'show-inline').init();
 
     forms('form', 'https://jsonplaceholder.typicode.com/posts');
 });

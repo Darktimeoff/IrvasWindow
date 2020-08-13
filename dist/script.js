@@ -223,6 +223,60 @@ module.exports = sloppyArrayMethod('forEach') ? function forEach(callbackfn /* ,
 
 /***/ }),
 
+/***/ "./node_modules/core-js/internals/array-from.js":
+/*!******************************************************!*\
+  !*** ./node_modules/core-js/internals/array-from.js ***!
+  \******************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var bind = __webpack_require__(/*! ../internals/bind-context */ "./node_modules/core-js/internals/bind-context.js");
+var toObject = __webpack_require__(/*! ../internals/to-object */ "./node_modules/core-js/internals/to-object.js");
+var callWithSafeIterationClosing = __webpack_require__(/*! ../internals/call-with-safe-iteration-closing */ "./node_modules/core-js/internals/call-with-safe-iteration-closing.js");
+var isArrayIteratorMethod = __webpack_require__(/*! ../internals/is-array-iterator-method */ "./node_modules/core-js/internals/is-array-iterator-method.js");
+var toLength = __webpack_require__(/*! ../internals/to-length */ "./node_modules/core-js/internals/to-length.js");
+var createProperty = __webpack_require__(/*! ../internals/create-property */ "./node_modules/core-js/internals/create-property.js");
+var getIteratorMethod = __webpack_require__(/*! ../internals/get-iterator-method */ "./node_modules/core-js/internals/get-iterator-method.js");
+
+// `Array.from` method implementation
+// https://tc39.github.io/ecma262/#sec-array.from
+module.exports = function from(arrayLike /* , mapfn = undefined, thisArg = undefined */) {
+  var O = toObject(arrayLike);
+  var C = typeof this == 'function' ? this : Array;
+  var argumentsLength = arguments.length;
+  var mapfn = argumentsLength > 1 ? arguments[1] : undefined;
+  var mapping = mapfn !== undefined;
+  var index = 0;
+  var iteratorMethod = getIteratorMethod(O);
+  var length, result, step, iterator, next;
+  if (mapping) mapfn = bind(mapfn, argumentsLength > 2 ? arguments[2] : undefined, 2);
+  // if the target is not iterable or it's an array with the default iterator - use a simple case
+  if (iteratorMethod != undefined && !(C == Array && isArrayIteratorMethod(iteratorMethod))) {
+    iterator = iteratorMethod.call(O);
+    next = iterator.next;
+    result = new C();
+    for (;!(step = next.call(iterator)).done; index++) {
+      createProperty(result, index, mapping
+        ? callWithSafeIterationClosing(iterator, mapfn, [step.value, index], true)
+        : step.value
+      );
+    }
+  } else {
+    length = toLength(O.length);
+    result = new C(length);
+    for (;length > index; index++) {
+      createProperty(result, index, mapping ? mapfn(O[index], index) : O[index]);
+    }
+  }
+  result.length = index;
+  return result;
+};
+
+
+/***/ }),
+
 /***/ "./node_modules/core-js/internals/array-includes.js":
 /*!**********************************************************!*\
   !*** ./node_modules/core-js/internals/array-includes.js ***!
@@ -3196,6 +3250,30 @@ $({ target: 'Array', proto: true, forced: !arrayMethodHasSpeciesSupport('filter'
 
 /***/ }),
 
+/***/ "./node_modules/core-js/modules/es.array.from.js":
+/*!*******************************************************!*\
+  !*** ./node_modules/core-js/modules/es.array.from.js ***!
+  \*******************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var $ = __webpack_require__(/*! ../internals/export */ "./node_modules/core-js/internals/export.js");
+var from = __webpack_require__(/*! ../internals/array-from */ "./node_modules/core-js/internals/array-from.js");
+var checkCorrectnessOfIteration = __webpack_require__(/*! ../internals/check-correctness-of-iteration */ "./node_modules/core-js/internals/check-correctness-of-iteration.js");
+
+var INCORRECT_ITERATION = !checkCorrectnessOfIteration(function (iterable) {
+  Array.from(iterable);
+});
+
+// `Array.from` method
+// https://tc39.github.io/ecma262/#sec-array.from
+$({ target: 'Array', stat: true, forced: INCORRECT_ITERATION }, {
+  from: from
+});
+
+
+/***/ }),
+
 /***/ "./node_modules/core-js/modules/es.array.iterator.js":
 /*!***********************************************************!*\
   !*** ./node_modules/core-js/modules/es.array.iterator.js ***!
@@ -3843,6 +3921,43 @@ $({ target: PROMISE, stat: true, forced: INCORRECT_ITERATION }, {
     return capability.promise;
   }
 });
+
+
+/***/ }),
+
+/***/ "./node_modules/core-js/modules/es.regexp.to-string.js":
+/*!*************************************************************!*\
+  !*** ./node_modules/core-js/modules/es.regexp.to-string.js ***!
+  \*************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var redefine = __webpack_require__(/*! ../internals/redefine */ "./node_modules/core-js/internals/redefine.js");
+var anObject = __webpack_require__(/*! ../internals/an-object */ "./node_modules/core-js/internals/an-object.js");
+var fails = __webpack_require__(/*! ../internals/fails */ "./node_modules/core-js/internals/fails.js");
+var flags = __webpack_require__(/*! ../internals/regexp-flags */ "./node_modules/core-js/internals/regexp-flags.js");
+
+var TO_STRING = 'toString';
+var RegExpPrototype = RegExp.prototype;
+var nativeToString = RegExpPrototype[TO_STRING];
+
+var NOT_GENERIC = fails(function () { return nativeToString.call({ source: 'a', flags: 'b' }) != '/a/b'; });
+// FF44- RegExp#toString has a wrong name
+var INCORRECT_NAME = nativeToString.name != TO_STRING;
+
+// `RegExp.prototype.toString` method
+// https://tc39.github.io/ecma262/#sec-regexp.prototype.tostring
+if (NOT_GENERIC || INCORRECT_NAME) {
+  redefine(RegExp.prototype, TO_STRING, function toString() {
+    var R = anObject(this);
+    var p = String(R.source);
+    var rf = R.flags;
+    var f = String(rf === undefined && R instanceof RegExp && !('flags' in RegExpPrototype) ? flags.call(R) : rf);
+    return '/' + p + '/' + f;
+  }, { unsafe: true });
+}
 
 
 /***/ }),
@@ -19143,9 +19258,6 @@ document.addEventListener('DOMContentLoaded', function () {
   popupCalc.modalDelegation({
     useWrapperDelegationSel: '.glazing'
   });
-
-  popupCalc.onShow = function () {};
-
   var glazingTabs = new _modules_tabs_component__WEBPACK_IMPORTED_MODULE_2__["default"]('.glazing', '.glazing_slider', '.glazing_block', '.glazing', '.glazing_content', 'active', 'a').init();
   var decorationTabs = new _modules_tabs_component__WEBPACK_IMPORTED_MODULE_2__["default"]('.decoration', '.decoration_slider', '.decoration_item', '.decoration_content .row', 'div', 'after_click', 'div').init();
   var timer = new _modules_timer_component__WEBPACK_IMPORTED_MODULE_3__["default"]('2020-08-15', '#timer', '#days', '#hours', '#minutes', '#seconds').init();
@@ -19156,6 +19268,7 @@ document.addEventListener('DOMContentLoaded', function () {
     classTargetImg: 'preview',
     uniqueClassIndInArray: 1
   });
+  var popCalcTabs = new _modules_tabs_component__WEBPACK_IMPORTED_MODULE_2__["default"]('.popup_calc', '.balcon_icons', 'img', '.big_img', 'img', 'do_image_more', '.balcon_icons_img', false, 'show-inline').init();
   Object(_modules_form_component__WEBPACK_IMPORTED_MODULE_5__["forms"])('form', 'https://jsonplaceholder.typicode.com/posts');
 });
 
@@ -19578,8 +19691,6 @@ function _checkNodeList(array) {
 }
 
 function _modalHandler(event) {
-  console.log(1);
-
   _modalClose.call(this, event);
 }
 
@@ -19613,12 +19724,47 @@ function _wrapperDelHandler(e) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return Tabs; });
-/* harmony import */ var core_js_modules_es_array_slice__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core-js/modules/es.array.slice */ "./node_modules/core-js/modules/es.array.slice.js");
-/* harmony import */ var core_js_modules_es_array_slice__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_slice__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var core_js_modules_es_string_match__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core-js/modules/es.string.match */ "./node_modules/core-js/modules/es.string.match.js");
-/* harmony import */ var core_js_modules_es_string_match__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_string_match__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var core_js_modules_es_symbol__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core-js/modules/es.symbol */ "./node_modules/core-js/modules/es.symbol.js");
+/* harmony import */ var core_js_modules_es_symbol__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_symbol__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var core_js_modules_es_symbol_description__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core-js/modules/es.symbol.description */ "./node_modules/core-js/modules/es.symbol.description.js");
+/* harmony import */ var core_js_modules_es_symbol_description__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_symbol_description__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var core_js_modules_es_symbol_iterator__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! core-js/modules/es.symbol.iterator */ "./node_modules/core-js/modules/es.symbol.iterator.js");
+/* harmony import */ var core_js_modules_es_symbol_iterator__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_symbol_iterator__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var core_js_modules_es_array_from__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! core-js/modules/es.array.from */ "./node_modules/core-js/modules/es.array.from.js");
+/* harmony import */ var core_js_modules_es_array_from__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_from__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var core_js_modules_es_array_iterator__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! core-js/modules/es.array.iterator */ "./node_modules/core-js/modules/es.array.iterator.js");
+/* harmony import */ var core_js_modules_es_array_iterator__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_iterator__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var core_js_modules_es_array_slice__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! core-js/modules/es.array.slice */ "./node_modules/core-js/modules/es.array.slice.js");
+/* harmony import */ var core_js_modules_es_array_slice__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_array_slice__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var core_js_modules_es_object_to_string__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! core-js/modules/es.object.to-string */ "./node_modules/core-js/modules/es.object.to-string.js");
+/* harmony import */ var core_js_modules_es_object_to_string__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_object_to_string__WEBPACK_IMPORTED_MODULE_6__);
+/* harmony import */ var core_js_modules_es_regexp_to_string__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! core-js/modules/es.regexp.to-string */ "./node_modules/core-js/modules/es.regexp.to-string.js");
+/* harmony import */ var core_js_modules_es_regexp_to_string__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_regexp_to_string__WEBPACK_IMPORTED_MODULE_7__);
+/* harmony import */ var core_js_modules_es_string_iterator__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! core-js/modules/es.string.iterator */ "./node_modules/core-js/modules/es.string.iterator.js");
+/* harmony import */ var core_js_modules_es_string_iterator__WEBPACK_IMPORTED_MODULE_8___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_string_iterator__WEBPACK_IMPORTED_MODULE_8__);
+/* harmony import */ var core_js_modules_es_string_match__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! core-js/modules/es.string.match */ "./node_modules/core-js/modules/es.string.match.js");
+/* harmony import */ var core_js_modules_es_string_match__WEBPACK_IMPORTED_MODULE_9___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_string_match__WEBPACK_IMPORTED_MODULE_9__);
+/* harmony import */ var core_js_modules_web_dom_collections_iterator__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! core-js/modules/web.dom-collections.iterator */ "./node_modules/core-js/modules/web.dom-collections.iterator.js");
+/* harmony import */ var core_js_modules_web_dom_collections_iterator__WEBPACK_IMPORTED_MODULE_10___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_web_dom_collections_iterator__WEBPACK_IMPORTED_MODULE_10__);
 
 
+
+
+
+
+
+
+
+
+
+
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
+
+function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -19630,6 +19776,9 @@ var Tabs =
 /*#__PURE__*/
 function () {
   function Tabs(section, parentTab, tab, parentTabContent, tabContent, activeClass, activeElement) {
+    var nameClassTabAndContentSame = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : true;
+    var activeTabContentClass = arguments.length > 8 && arguments[8] !== undefined ? arguments[8] : 'show';
+
     _classCallCheck(this, Tabs);
 
     this.section = document.querySelector(section);
@@ -19639,6 +19788,8 @@ function () {
     this.tabContent = tabContent;
     this.activeClass = activeClass;
     this.activeElement = activeElement !== tab ? activeElement : parentTab;
+    this.nameClassTabAndContentSame = nameClassTabAndContentSame;
+    this.activeTabContentClass = activeTabContentClass;
   }
 
   _createClass(Tabs, [{
@@ -19657,22 +19808,34 @@ function _tabClickHandler(e) {
   var target = e.target.closest(this.tab);
   var link = target.querySelector(this.activeElement);
 
-  if (target && target.classList.contains(this.tab.slice(1))) {
+  if (this.nameClassTabAndContentSame && target && target.classList.contains(this.tab.slice(1))) {
     var postion = link.className.match(/_/).index;
     var tabContentName = link.className.slice(0, postion);
 
-    _hideClassActiveFromTab.call(this, this.parentTab, '.' + this.activeClass);
+    _tab.call(this, this.parentTab, this.parentTabContent, this.activeClass, this.activeTabContentClass, link, _searchTabContent.call(this, tabContentName));
+  }
 
-    _addClassActiveToTab.call(this, link);
+  if (!this.nameClassTabAndContentSame && e.target.closest(this.activeElement)) {
+    var tab = e.target.closest(this.activeElement);
 
-    _hideClassActiveFromTab.call(this, this.parentTabContent, '.show');
+    var ind = _toConsumableArray(this.parentTab.querySelectorAll(this.tab)).indexOf(e.target);
 
-    _showTabContent.call(this, _searchTabContent.call(this, tabContentName));
+    _tab.call(this, this.parentTab, this.parentTabContent, this.activeClass, this.activeTabContentClass, tab, this.parentTabContent.querySelectorAll(this.tabContent)[ind]);
   }
 }
 
-function _addClassActiveToTab(tab) {
-  tab.classList.add(this.activeClass);
+function _tab(parentTab, parentTabContent, activeClassTab, activeClassTabContent, currentTab, currentTabContent) {
+  _hideClassActiveFromTab.call(this, parentTab, '.' + activeClassTab);
+
+  _addClassActiveToTab.call(this, currentTab, activeClassTab);
+
+  _hideClassActiveFromTab.call(this, parentTabContent, '.' + activeClassTabContent);
+
+  _addClassActiveToTab.call(this, currentTabContent, activeClassTabContent);
+}
+
+function _addClassActiveToTab(tab, activeClass) {
+  tab.classList.add(activeClass);
 }
 
 function _hideClassActiveFromTab(parentTab, activeClass) {
@@ -19681,10 +19844,6 @@ function _hideClassActiveFromTab(parentTab, activeClass) {
 
 function _deleteClassActiveFromTab(tab, activeClass) {
   tab.classList.remove(activeClass);
-}
-
-function _showTabContent(tab) {
-  tab.classList.add('show');
 }
 
 function _searchTabContent(tabName) {

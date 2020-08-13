@@ -80,7 +80,6 @@ function _checkNodeList(array) {
 	return Boolean(array instanceof NodeList);
 }
 function _modalHandler(event) {
-	console.log(1)
 	_modalClose.call(this, event);
 }
 
