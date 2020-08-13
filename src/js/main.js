@@ -17,7 +17,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const popupCalc = new Modal('.popup_calc', '.popup_calc_btn');
     popupCalc.modalDelegation({useWrapperDelegationSel: '.glazing'});
-   
+    popupCalc.onShow = function() {
+        const popupCalcProfile = new Modal('.popup_calc_profile', '.popup_calc_button');
+        popupCalcProfile.init();
+        popupCalcProfile.onShow = function() {
+            const data = {};
+            document.querySelector('.popup_calc').querySelectorAll('input').forEach(input => {
+                data[input.getAttribute('id')] = input.value;
+            });
+            localStorage.setItem('popCalcData', JSON.stringify(data));
+            popupCalc.hide();
+            const popCalcEnd = new Modal('.popup_calc_end', '.popup_calc_profile_button');
+            popCalcEnd.init();
+            popCalcEnd.onShow = () => {
+                popupCalcProfile.hide();
+                const input = this.modal.querySelectorAll('.checkbox');
+                const select = this.modal.querySelector('select');
+                data.typeGlazing = select.value;
+                input.forEach(input => {
+                    if(input.checked) data.temparature = input.nextElementSibling.getAttribute('id');
+                })
+                localStorage.setItem('popCalcData', JSON.stringify(data));
+            }
+        }
+        
+    }
 
     const glazingTabs = new Tabs('.glazing', '.glazing_slider', '.glazing_block', '.glazing', '.glazing_content' , 'active', 'a').init();
 
